@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcousticStart — Basic Guitar Chords Tutorial</title>
+  <style>
+    :root {
+      --bg: #faf7f2;
+      --surface: #ffffff;
+      --ink: #241c15;
+      --muted: #6b5e53;
+      --accent: #b45309;
+      --accent-dark: #92400e;
+      --accent-soft: #fef3c7;
+      --border: #e6ddd0;
+      --wood: #5c3a21;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2c1810 0%, #4a2c1d 100%);
+      color: #fffaf3;
+      padding: 3rem 1.5rem;
+      text-align: center;
+      border-bottom: 4px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      max-width: 600px;
+      margin: 0 auto;
+      color: #e7d8c9;
+      font-size: 1.05rem;
+    }
+
+    main {
+      max-width: 920px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      margin-bottom: 0.4rem;
+      color: var(--ink);
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.98rem;
+    }
+
+    /* Chord Selector Buttons */
+    .chord-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .chord-btn {
+      padding: 0.65rem 1.2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      background-color: var(--surface);
+      color: var(--ink);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .chord-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chord-btn.active {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    /* Interactive Chord Viewer Card */
+    .chord-viewer {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .chord-viewer {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Fretboard Diagram */
+    .diagram-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .string-markers {
+      display: grid;
+      grid-template-columns: repeat(6, 36px);
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .string-markers span.open {
+      color: #15803d;
+    }
+
+    .string-markers span.mute {
+      color: #b91c1c;
+    }
+
+    .fretboard {
+      border-top: 6px solid var(--wood);
+      border-left: 2px solid #8c7a6b;
+      border-right: 2px solid #8c7a6b;
+      background-color: #fdfbf7;
+      display: grid;
+      grid-template-rows: repeat(4, 46px);
+      width: 182px;
+      position: relative;
+    }
+
+    .fret-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-bottom: 2px solid #b8a99a;
+      position: relative;
+    }
+
+    .fret-cell {
+      border-right: 1px solid #cbd5e1;
+    }
+
+    .fret-cell:last-child {
+      border-right: none;
+    }
+
+    .finger-dots-layer {
+      position: absolute;
+      top: 0;
+      left: -18px;
+      width: 216px;
+      height: 184px;
+      display: grid;
+      grid-template-columns: repeat(6, 36px);
+      grid-template-rows: repeat(4, 46px);
+      pointer-events: none;
+    }
+
+    .dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+    }
+
+    .string-labels {
+      display: grid;
+      grid-template-columns: repeat(6, 36px);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* Chord Details */
+    .chord-details h2 {
+      font-size: 1.75rem;
+      color: var(--ink);
+      margin-bottom: 0.25rem;
+    }
+
+    .chord-badge {
+      display: inline-block;
+      background-color: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    .chord-details p {
+      color: #3f362f;
+      margin-bottom: 1rem;
+    }
+
+    .finger-guide {
+      background-color: var(--bg);
+      border-left: 4px solid var(--accent);
+      padding: 0.85rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .finger-guide ul {
+      padding-left: 1.2rem;
+      margin-top: 0.35rem;
+    }
+
+    .strum-btn {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.18s ease;
+    }
+
+    .strum-btn:hover {
+      background-color: var(--accent-dark);
+    }
+
+    /* Practice Tips Grid */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .tip-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.35rem;
+    }
+
+    .tip-card h3 {
+      font-size: 1.08rem;
+      color: var(--accent-dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .tip-card p {
+      font-size: 0.94rem;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.75rem 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AcousticStart: Basic Guitar Chords</h1>
+    <p>An interactive beginner's guide to mastering essential open chords, finger placements, and clean strumming.</p>
+  </header>
+
+  <main>
+    <h2 class="section-title">1. Choose a Beginner Chord</h2>
+    <p class="section-subtitle">Click any chord below to inspect the finger diagram, read placement tips, and listen to how it sounds.</p>
+
+    <div class="chord-buttons" id="chordButtons"></div>
+
+    <section class="chord-viewer" aria-live="polite">
+      <div class="diagram-wrapper">
+        <div class="string-markers" id="stringMarkers"></div>
+        <div class="fretboard">
+          <div class="fret-row"><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div></div>
+          <div class="fret-row"><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div></div>
+          <div class="fret-row"><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div></div>
+          <div class="fret-row"><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div><div class="fret-cell"></div></div>
+          <div class="finger-dots-layer" id="fingerDots"></div>
+        </div>
+        <div class="string-labels">
+          <span>E</span><span>A</span><span>D</span><span>G</span><span>B</span><span>e</span>
+        </div>
+      </div>
+
+      <div class="chord-details">
+        <span class="chord-badge" id="chordCategory">Open Major Chord</span>
+        <h2 id="chordName">C Major (C)</h2>
+        <p id="chordDesc"></p>
+        <div class="finger-guide">
+          <strong>Finger Placement Guide:</strong>
+          <ul id="fingerSteps"></ul>
+        </div>
+        <button class="strum-btn" id="strumBtn" type="button">Strum Chord</button>
+      </div>
+    </section>
+
+    <h2 class="section-title">2. Essential Tips for Beginners</h2>
+    <p class="section-subtitle">Keep these habits in mind during your daily 15-minute practice sessions.</p>
+
+    <div class="tips-grid">
+      <div class="tip-card">
+        <h3>Press Right Behind the Fret</h3>
+        <p>Place your fingertips just behind the metal fret wire rather than in the middle of the space. This prevents buzzing strings with less effort.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Curve Your Fingers</h3>
+        <p>Keep your knuckles arched so the fleshy pads of your fingers do not accidentally touch and mute the open strings ringing below them.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Practice Slow Transitions</h3>
+        <p>Switch back and forth between two chords—such as G Major and C Major—slowly and cleanly before speeding up your strumming hand.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    AcousticStart — Basic Guitar Chords Tutorial Project | Created by Jeremy Sunico (Info Tech 3 B)
+  </footer>
+
+  <script>
+    const CHORDS = [
+      {
+        id: "C",
+        name: "C Major (C)",
+        category: "Open Major Chord",
+        description: "One of the brightest and most common chords in popular music. Strum from the 5th (A) string down and avoid hitting the thick 6th string.",
+        markers: ["X", "O", "O", "O", "O", "O"],
+        frets: [null, 3, 2, 0, 1, 0],
+        fingers: [null, 3, 2, null, 1, null],
+        steps: [
+          "Index finger (1): 1st fret on the B (2nd) string.",
+          "Middle finger (2): 2nd fret on the D (4th) string.",
+          "Ring finger (3): 3rd fret on the A (5th) string."
+        ],
+        frequencies: [null, 130.81, 164.81, 196.00, 261.63, 329.63]
+      },
+      {
+        id: "G",
+        name: "G Major (G)",
+        category: "Open Major Chord",
+        description: "A full, resonant six-string chord that forms the backbone of thousands of acoustic folk, pop, and rock songs.",
+        markers: ["O", "O", "O", "O", "O", "O"],
+        frets: [3, 2, 0, 0, 0, 3],
+        fingers: [2, 1, null, null, null, 3],
+        steps: [
+          "Index finger (1): 2nd fret on the A (5th) string.",
+          "Middle finger (2): 3rd fret on the low E (6th) string.",
+          "Ring finger (3): 3rd fret on the high e (1st) string."
+        ],
+        frequencies: [98.00, 123.47, 146.83, 196.00, 246.94, 392.00]
+      },
+      {
+        id: "D",
+        name: "D Major (D)",
+        category: "Open Major Chord",
+        description: "A compact triangle-shaped chord played only on the bottom four strings. Keep the top two thick strings muted.",
+        markers: ["X", "X", "O", "O", "O", "O"],
+        frets: [null, null, 0, 2, 3, 2],
+        fingers: [null, null, null, 1, 3, 2],
+        steps: [
+          "Index finger (1): 2nd fret on the G (3rd) string.",
+          "Middle finger (2): 2nd fret on the high e (1st) string.",
+          "Ring finger (3): 3rd fret on the B (2nd) string."
+        ],
+        frequencies: [null, null, 146.83, 220.00, 293.66, 369.99]
+      },
+      {
+        id: "Em",
+        name: "E Minor (Em)",
+        category: "Open Minor Chord",
+        description: "The easiest chord for beginners to learn, requiring only two fingers while letting all six strings ring out with a warm, moody tone.",
+        markers: ["O", "O", "O", "O", "O", "O"],
+        frets: [0, 2, 2, 0, 0, 0],
+        fingers: [null, 2, 3, null, null, null],
+        steps: [
+          "Middle finger (2): 2nd fret on the A (5th) string.",
+          "Ring finger (3): 2nd fret on the D (4th) string.",
+          "Strum all six strings freely from top to bottom."
+        ],
+        frequencies: [82.41, 123.47, 164.81, 196.00, 246.94, 329.63]
+      },
+      {
+        id: "Am",
+        name: "A Minor (Am)",
+        category: "Open Minor Chord",
+        description: "Shares the exact same finger shape as E Major, shifted down one string. Strum from the 5th (A) string down.",
+        markers: ["X", "O", "O", "O", "O", "O"],
+        frets: [null, 0, 2, 2, 1, 0],
+        fingers: [null, null, 2, 3, 1, null],
+        steps: [
+          "Index finger (1): 1st fret on the B (2nd) string.",
+          "Middle finger (2): 2nd fret on the D (4th) string.",
+          "Ring finger (3): 2nd fret on the G (3rd) string."
+        ],
+        frequencies: [null, 110.00, 164.81, 220.00, 261.63, 329.63]
+      }
+    ];
+
+    let activeChord = CHORDS[0];
+    let audioCtx = null;
+
+    const buttonsContainer = document.getElementById("chordButtons");
+    const stringMarkersEl = document.getElementById("stringMarkers");
+    const fingerDotsEl = document.getElementById("fingerDots");
+    const chordCategoryEl = document.getElementById("chordCategory");
+    const chordNameEl = document.getElementById("chordName");
+    const chordDescEl = document.getElementById("chordDesc");
+    const fingerStepsEl = document.getElementById("fingerSteps");
+    const strumBtn = document.getElementById("strumBtn");
+
+    function renderButtons() {
+      buttonsContainer.innerHTML = "";
+      CHORDS.forEach((chord) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chord-btn" + (chord.id === activeChord.id ? " active" : "");
+        btn.textContent = chord.id;
+        btn.addEventListener("click", () => {
+          activeChord = chord;
+          renderButtons();
+          renderChordDetails();
+        });
+        buttonsContainer.appendChild(btn);
+      });
+    }
+
+    function renderChordDetails() {
+      chordCategoryEl.textContent = activeChord.category;
+      chordNameEl.textContent = activeChord.name;
+      chordDescEl.textContent = activeChord.description;
+
+      // Render O / X string markers
+      stringMarkersEl.innerHTML = "";
+      activeChord.markers.forEach((mark, idx) => {
+        const span = document.createElement("span");
+        if (mark === "X") {
+          span.textContent = "X";
+          span.className = "mute";
+        } else if (activeChord.frets[idx] === 0) {
+          span.textContent = "O";
+          span.className = "open";
+        } else {
+          span.textContent = "";
+        }
+        stringMarkersEl.appendChild(span);
+      });
+
+      // Render finger dots on 6x4 grid
+      fingerDotsEl.innerHTML = "";
+      for (let fret = 1; fret <= 4; fret++) {
+        for (let str = 0; str < 6; str++) {
+          const cell = document.createElement("div");
+          if (activeChord.frets[str] === fret && activeChord.fingers[str]) {
+            const dot = document.createElement("div");
+            dot.className = "dot";
+            dot.textContent = activeChord.fingers[str];
+            cell.appendChild(dot);
+          }
+          fingerDotsEl.appendChild(cell);
+        }
+      }
+
+      // Render bullet steps
+      fingerStepsEl.innerHTML = "";
+      activeChord.steps.forEach((step) => {
+        const li = document.createElement("li");
+        li.textContent = step;
+        fingerStepsEl.appendChild(li);
+      });
+    }
+
+    function playChordStrum(frequencies) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+
+      const now = audioCtx.currentTime;
+      let delay = 0;
+
+      frequencies.forEach((freq) => {
+        if (!freq) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, now + delay);
+
+        gain.gain.setValueAtTime(0.001, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.18, now + delay + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 1.6);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + delay);
+        osc.stop(now + delay + 1.65);
+
+        delay += 0.055;
+      });
+    }
+
+    strumBtn.addEventListener("click", () => {
+      playChordStrum(activeChord.frequencies);
+    });
+
+    renderButtons();
+    renderChordDetails();
+  </script>
+</body>
+</html>
